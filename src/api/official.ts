@@ -7,7 +7,15 @@ function setConfig(apiKey: string, basePath?: string): ClientOptions {
   return {
     apiKey,
     baseURL: basePath || 'https://api.openai.com/v1',
-    dangerouslyAllowBrowser: true
+    dangerouslyAllowBrowser: true,
+    fetch: (input, init) =>
+      fetch(input, {
+        ...(init ?? {}),
+        // the openai sdk sends some extra headers causing a CORS error when running with ollama locally
+        // related issue: https://github.com/ollama/ollama/pull/9237
+        // removing the headers from the request fixes this
+        headers: { 'Content-Type': 'application/json' }
+      })
   }
 }
 
